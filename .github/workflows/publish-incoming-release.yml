@@ -1,0 +1,76 @@
+name: Publish incoming release
+
+on:
+  push:
+    branches:
+      - "incoming/**"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare public download names
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag=$(<release-tag.txt)
+          title=$(<release-title.txt)
+          mkdir publish
+
+          while IFS= read -r -d '' asset; do
+            cp "$asset" "publish/$(basename "$asset")"
+          done < <(find payload -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' \) -print0)
+
+          dmg=$(find payload -maxdepth 1 -type f -name '*.dmg' -print -quit)
+          exe=$(find payload -maxdepth 1 -type f -name '*.exe' -print -quit)
+
+          if [[ -n "$dmg" ]]; then
+            cp "$dmg" publish/Dima.dmg
+          fi
+          if [[ -n "$exe" ]]; then
+            cp "$exe" publish/Dima-Setup.exe
+          fi
+
+          if ! compgen -G 'publish/*' >/dev/null; then
+            echo 'No DMG or EXE release assets were received.' >&2
+            exit 1
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update the public release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_TITLE: ${{ steps.release.outputs.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" publish/* --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$RELEASE_TAG" \
+              --title "$RELEASE_TITLE" \
+              --notes-file release-notes.md \
+              --latest \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" publish/* \
+              --target main \
+              --title "$RELEASE_TITLE" \
+              --notes-file release-notes.md \
+              --latest \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+      - name: Remove the transfer branch
+        shell: bash
+        run: git push origin --delete "$GITHUB_REF_NAME"
