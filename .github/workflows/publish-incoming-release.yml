@@ -50,6 +50,7 @@ jobs:
           cp "assembled/Dima-Setup-$version.exe" "publish/Dima-Setup-$version.exe"
           cp assembled/Dima-Installer.dmg publish/Dima.dmg
           cp "assembled/Dima-Setup-$version.exe" publish/Dima-Setup.exe
+          cp SHA256SUMS publish/SHA256SUMS
 
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "title=$title" >> "$GITHUB_OUTPUT"
