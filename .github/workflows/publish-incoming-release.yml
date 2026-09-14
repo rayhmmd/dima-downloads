@@ -19,29 +19,37 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          shopt -s nullglob
 
           tag=$(<release-tag.txt)
           title=$(<release-title.txt)
-          mkdir publish
-
-          while IFS= read -r -d '' asset; do
-            cp "$asset" "publish/$(basename "$asset")"
-          done < <(find payload -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' \) -print0)
-
-          dmg=$(find payload -maxdepth 1 -type f -name '*.dmg' -print -quit)
-          exe=$(find payload -maxdepth 1 -type f -name '*.exe' -print -quit)
-
-          if [[ -n "$dmg" ]]; then
-            cp "$dmg" publish/Dima.dmg
-          fi
-          if [[ -n "$exe" ]]; then
-            cp "$exe" publish/Dima-Setup.exe
-          fi
-
-          if ! compgen -G 'publish/*' >/dev/null; then
-            echo 'No DMG or EXE release assets were received.' >&2
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag must use vX.Y.Z: $tag" >&2
             exit 1
           fi
+          version=${tag#v}
+          expected_assets=$(printf '%s\n' Dima-Installer.dmg "Dima-Setup-$version.exe" | sort)
+          checksum_assets=$(awk '{ name=$2; sub(/^\*/, "", name); print name }' SHA256SUMS | sort)
+          if [ "$checksum_assets" != "$expected_assets" ]; then
+            echo 'SHA256SUMS does not describe exactly the required release assets.' >&2
+            exit 1
+          fi
+
+          mkdir assembled publish
+          for asset in Dima-Installer.dmg "Dima-Setup-$version.exe"; do
+            parts=(payload/"$asset".part-*)
+            if [ "${#parts[@]}" -eq 0 ]; then
+              echo "No transfer chunks found for $asset." >&2
+              exit 1
+            fi
+            cat "${parts[@]}" > "assembled/$asset"
+          done
+          (cd assembled && sha256sum --check ../SHA256SUMS)
+
+          cp assembled/Dima-Installer.dmg publish/Dima-Installer.dmg
+          cp "assembled/Dima-Setup-$version.exe" "publish/Dima-Setup-$version.exe"
+          cp assembled/Dima-Installer.dmg publish/Dima.dmg
+          cp "assembled/Dima-Setup-$version.exe" publish/Dima-Setup.exe
 
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "title=$title" >> "$GITHUB_OUTPUT"
@@ -56,20 +64,15 @@ jobs:
           set -euo pipefail
 
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" publish/* --clobber --repo "$GITHUB_REPOSITORY"
-            gh release edit "$RELEASE_TAG" \
-              --title "$RELEASE_TITLE" \
-              --notes-file release-notes.md \
-              --latest \
-              --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$RELEASE_TAG" publish/* \
-              --target main \
-              --title "$RELEASE_TITLE" \
-              --notes-file release-notes.md \
-              --latest \
-              --repo "$GITHUB_REPOSITORY"
+            echo "Refusing to replace existing public release $RELEASE_TAG." >&2
+            exit 1
           fi
+          gh release create "$RELEASE_TAG" publish/* \
+            --target main \
+            --title "$RELEASE_TITLE" \
+            --notes-file release-notes.md \
+            --latest \
+            --repo "$GITHUB_REPOSITORY"
 
       - name: Remove the transfer branch
         shell: bash
