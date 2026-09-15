@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Privacy policy for Dima, the prayer companion for Apple and Windows devices.">
+  <title>Dima — Privacy Policy</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #07090d; color: #f5f5f7; }
+    main { width: min(720px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0 96px; }
+    h1 { margin: 0 0 8px; font-size: clamp(2.25rem, 7vw, 4rem); line-height: 1; letter-spacing: -0.045em; }
+    h2 { margin: 42px 0 12px; font-size: 1.2rem; letter-spacing: -0.015em; }
+    p, li { color: #b7bac2; font-size: 1rem; line-height: 1.7; }
+    ul { padding-left: 1.25rem; }
+    a { color: #f5f5f7; text-underline-offset: 0.2em; }
+    .updated { margin: 0 0 48px; color: #7f838d; }
+    .brand { display: inline-block; margin-bottom: 28px; color: #fff; font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="brand" href="https://github.com/rayhmmd/dima-downloads">Dima</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 12 September 2026</p>
+
+    <p>Dima has no Dima-operated account, analytics, advertising, telemetry, or cloud service. The Dima developer does not receive your name, profile photo, prayer history, settings, location, or crash reports through the app.</p>
+    <p>Some features use operating-system or third-party network services as described below. Prayer-time and Qibla calculations themselves run on your device.</p>
+
+    <h2>Location and city lookup</h2>
+    <ul>
+      <li><strong>iPhone and Mac:</strong> If you grant location access, Dima reads your device's coordinates for prayer times and Qibla. Dima may send coordinates to Apple's geocoding service to obtain a city and country name. Searching for a city uses Apple's MapKit search service, so Apple receives the search request under its own terms.</li>
+      <li><strong>Windows:</strong> Dima does not request device location permission. Automatic location uses <code>ipapi.co</code>, with <code>ipwho.is</code> as a fallback. These providers receive the network request and its IP address and return an approximate location. Manual city search sends the search text and app language to Open-Meteo's geocoding service. Those providers handle the request under their own terms.</li>
+    </ul>
+    <p>Dima stores the last accepted location or manually selected city locally so it can restore the same prayer schedule after relaunch. Choosing another location replaces that saved selection.</p>
+
+    <h2>Data stored locally</h2>
+    <ul>
+      <li>Your first name, profile photo, settings, onboarding state, and prayer history are stored in Dima's local app storage.</li>
+      <li>Notification preferences and delivery state are stored locally, and reminders are scheduled or delivered by the operating system.</li>
+      <li>On iPhone and Mac, pairing credentials are stored in the system Keychain.</li>
+      <li>On iPhone and Mac, Dima may save a limited local report for an uncaught app exception. Reports omit the exception reason and user-info payload, are readable only by the local user/app identity, and are limited to the ten newest reports.</li>
+    </ul>
+    <p>Dima does not automatically upload local data or diagnostic reports.</p>
+
+    <h2>Paired prayer-history sync</h2>
+    <p>If you explicitly pair Dima on an iPhone and Mac, the two devices exchange the full prayer-completion history directly over the local network. The exchange is encrypted using the pairing key. It does not pass through a Dima-operated server. Disconnecting prevents future sync but does not erase history already stored on either device.</p>
+
+    <h2>Copying and sharing diagnostics</h2>
+    <p>On supported Apple builds, you can review, delete, copy, or use the system share sheet for a local exception report. Copying or sharing is a user-initiated action; the selected destination then handles that report under its own terms.</p>
+
+    <h2>Your control and deletion</h2>
+    <p>You can revoke Apple location, camera, notification, and local-network permissions in system settings. Dima's in-app controls let you change location and notification preferences and disconnect a paired device.</p>
+    <p>Uninstall behavior differs by platform and distribution method. Removing the app may leave preferences, application-support files, Windows per-user data, or Keychain items on the device. Do not rely on uninstall alone as a guarantee that all local Dima data has been erased.</p>
+
+    <h2>Data sale, advertising, and children</h2>
+    <p>Dima does not sell or rent data and contains no advertising or third-party tracking SDK. Dima does not knowingly collect personal information from children through a Dima-operated service because it operates no such service.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the updated version and date will be posted here.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about privacy? Contact <a href="mailto:hello@rayanehammoud.com">hello@rayanehammoud.com</a>.</p>
+  </main>
+</body>
+</html>
