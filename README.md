@@ -10,3 +10,7 @@ The application source remains in a private repository.
 
 Versioned installers and release notes are available on the
 [Releases page](https://github.com/rayhmmd/dima-downloads/releases).
+
+## Privacy
+
+Read the [Dima privacy policy](https://rayhmmd.github.io/dima-downloads/privacy/).
