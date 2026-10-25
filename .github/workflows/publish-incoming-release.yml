@@ -28,7 +28,10 @@ jobs:
             exit 1
           fi
           version=${tag#v}
-          expected_assets=$(printf '%s\n' Dima-Installer.dmg "Dima-Setup-$version.exe" | sort)
+          # appcast.xml (Sparkle, Mac) and latest.yml (electron-updater, Windows)
+          # are the in-app update feeds, read through releases/latest/download.
+          assets=(Dima-Installer.dmg "Dima-Setup-$version.exe" appcast.xml latest.yml)
+          expected_assets=$(printf '%s\n' "${assets[@]}" | sort)
           checksum_assets=$(awk '{ name=$2; sub(/^\*/, "", name); print name }' SHA256SUMS | sort)
           if [ "$checksum_assets" != "$expected_assets" ]; then
             echo 'SHA256SUMS does not describe exactly the required release assets.' >&2
@@ -36,7 +39,7 @@ jobs:
           fi
 
           mkdir assembled publish
-          for asset in Dima-Installer.dmg "Dima-Setup-$version.exe"; do
+          for asset in "${assets[@]}"; do
             parts=(payload/"$asset".part-*)
             if [ "${#parts[@]}" -eq 0 ]; then
               echo "No transfer chunks found for $asset." >&2
@@ -50,6 +53,8 @@ jobs:
           cp "assembled/Dima-Setup-$version.exe" "publish/Dima-Setup-$version.exe"
           cp assembled/Dima-Installer.dmg publish/Dima.dmg
           cp "assembled/Dima-Setup-$version.exe" publish/Dima-Setup.exe
+          cp assembled/appcast.xml publish/appcast.xml
+          cp assembled/latest.yml publish/latest.yml
           cp SHA256SUMS publish/SHA256SUMS
 
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
